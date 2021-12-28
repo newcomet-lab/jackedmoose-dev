@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Head from 'next/head'
 
 import { useState } from "react";
@@ -5,11 +6,62 @@ import { Toaster } from 'react-hot-toast';
 import { useWallet } from "@solana/wallet-adapter-react";
 import useCandyMachine from '../hooks/use-candy-machine';
 import Header from '../components/header';
-import Footer from '../components/footer';
 import useWalletBalance from '../hooks/use-wallet-balance';
 import { shortenAddress } from '../utils/candy-machine';
 import Countdown from 'react-countdown';
-import { RecaptchaButton } from '../components/recaptcha-button';
+import {
+  Button,
+  CircularProgress,
+  TextField,
+  MenuItem,
+  FormControl
+} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+
+import styled from "styled-components";
+
+const useStyles = makeStyles({
+  selectRoot: {
+    width: 85,
+    textAlign: 'center',
+    "& .MuiOutlinedInput-input": {
+      color: "#d5d5d5",
+      padding: '12.5px 28px 12.5px 14px'
+    },
+    "& .MuiInputLabel-root": {
+      color: "#d5d5d5"
+    },
+    "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#d5d5d5"
+    },
+    "&:hover .MuiOutlinedInput-input": {
+      color: "#ffc6c6"
+    },
+    "&:hover .MuiInputLabel-root": {
+      color: "#ffc6c6"
+    },
+    "&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#ffc6c6"
+    },
+    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-input": {
+      color: "#ffc6c6"
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#ffc6c6"
+    },
+    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#ffc6c6"
+    },
+    "& .MuiOutlinedInput-root .MuiSelect-iconOutlined": {
+      color: "#d5d5d5"
+    },
+    "& .MuiOutlinedInput-root.Mui-focused .MuiSelect-iconOutlined": {
+      color: "#ffc6c6"
+    }
+  }
+});
+
+const MintButton = styled(Button)``; // add your styles here
 
 const Home = () => {
   const [balance] = useWalletBalance()
@@ -18,87 +70,105 @@ const Home = () => {
 
   const { isSoldOut, mintStartDate, isMinting, onMint, onMintMultiple, nftsData } = useCandyMachine()
 
+  const [mintCount, setMintCount] = useState(1);
+
+  const handleMintCountChange = (event: any) => {
+    setMintCount(event.target.value);
+  };
+
+  const onClickMint = () => {
+    if (mintCount === 1) {
+      onMint();
+    } else {
+      onMintMultiple(mintCount);
+    }
+  };
+
+  const classes = useStyles();
+
   return (
     <main className="p-5">
       <Toaster />
       <Head>
-        <title>Solana Candy Factory</title>
-        <meta name="description" content="Solana blockchain candy machine app boilerplate on top of Metaplex Candy Machine. NextJS, Tailwind, Anchor, SolanaLabs.React, dev/mainnet automation scripts." />
-        <link rel="icon" href="/favicon.ico" />
+        <title>Mint | Jacked Moose</title>
+        <meta name="description" content="Jacked Moose is an NFT collection made of 1200 unique disguises built on the Solana blockchain." />
+        <link rel="icon" href="/favicon.png" />
       </Head>
 
-      <Header />
+      <Header connected={wallet.connected} />
 
-      <div className="flex flex-col justify-center items-center flex-1 space-y-3 mt-20">
-        <img
-          className="rounded-md shadow-lg"
-          src={`/candy.jpeg`}
-          height={200}
-          width={200}
-          alt="Candy Image" />
-
-        <span className="text-gray-800 font-bold text-2xl cursor-default">
-          THIS IS THE BEST CANDY MACHINE EVER
-        </span>
-
-        {!wallet.connected && <span
-          className="text-gray-800 font-bold text-2xl cursor-default">
-          NOT CONNECTED, PLEASE CLICK SELECT WALLET...
-        </span>}
-
-        {wallet.connected &&
-          <p className="text-gray-800 font-bold text-lg cursor-default">Address: {shortenAddress(wallet.publicKey?.toBase58() || "")}</p>
-        }
-
-        {wallet.connected &&
-          <>
-            <p className="text-gray-800 font-bold text-lg cursor-default">Balance: {(balance || 0).toLocaleString()} SOL</p>
-            <p className="text-gray-800 font-bold text-lg cursor-default">Available/Minted/Total: {nftsData.itemsRemaining}/{nftsData.itemsRedeemed}/{nftsData.itemsAvailable}</p>
-          </>
-        }
-
-        <div className="flex flex-col justify-start items-start">
-          {wallet.connected &&
-            <RecaptchaButton
-              actionName="mint"
-              disabled={isSoldOut || isMinting || !isActive}
-              onClick={onMint}
-            >
-              {isSoldOut ? (
-                "SOLD OUT"
-              ) : isActive ?
-                <span>MINT {isMinting && 'LOADING...'}</span> :
-                <Countdown
-                  date={mintStartDate}
-                  onMount={({ completed }) => completed && setIsActive(true)}
-                  onComplete={() => setIsActive(true)}
-                  renderer={renderCounter}
-                />
-              }
-            </RecaptchaButton>
-          }
-
-          {wallet.connected &&
-            <RecaptchaButton
-              actionName="mint5"
-              disabled={isSoldOut || isMinting || !isActive}
-              onClick={() => onMintMultiple(5)}
-            >
-              {isSoldOut ? (
-                "SOLD OUT"
-              ) : isActive ?
-                <span>MINT 5 {isMinting && 'LOADING...'}</span> :
-                <Countdown
-                  date={mintStartDate}
-                  onMount={({ completed }) => completed && setIsActive(true)}
-                  onComplete={() => setIsActive(true)}
-                  renderer={renderCounter}
-                />
-              }
-            </RecaptchaButton>
-          }
+      <div className="md:flex md:justify-center mt-10 md:mt-24 mx-10 md:mx-24">
+        <div className="flex justify-center items-center flex-1 space-y-3">
+          <img
+            className="rounded-md shadow-lg"
+            src={`/mds.gif`}
+            height={300}
+            width={300}
+            alt="NFT Image" />
         </div>
-        <Footer />
+        <div className="flex flex-col justify-center items-center flex-1 space-y-3 text-center">
+          <span className="font-bold text-2xl cursor-default">
+            WELCOME TO JACKED MOOSE!
+          </span>
+
+          {!wallet.connected && <span
+            className="font-bold text-2xl cursor-default">
+            NOT CONNECTED, PLEASE CLICK SELECT WALLET...
+          </span>}
+
+          {wallet.connected &&
+            <p className="font-bold text-lg cursor-default">Address: {shortenAddress(wallet.publicKey?.toBase58() || "")}</p>
+          }
+
+          {wallet.connected &&
+            <>
+              <p className="font-bold text-lg cursor-default">Balance: {(balance || 0).toLocaleString()} SOL</p>
+              <p className="font-bold text-lg cursor-default">Minted / Total: {nftsData.itemsRedeemed} / {nftsData.itemsAvailable}</p>
+            </>
+          }
+
+          <div className="flex flex-row justify-center items-center space-x-5">
+            {wallet.connected &&
+              <>
+                <TextField
+                  className={classes.selectRoot}
+                  value={mintCount}
+                  onChange={handleMintCountChange}
+                  variant="outlined"
+                  label="Mint Count"
+                  select
+                >
+                  {
+                    (new Array(20).fill(null)).map((_, idx) => 
+                      <MenuItem key={idx} value={idx + 1}>{ idx + 1 }</MenuItem>
+                    )
+                  }
+                </TextField>
+                <Button 
+                  variant="contained"
+                  size="large"
+                  disabled={isSoldOut || isMinting || !isActive}
+                  onClick={onClickMint}
+                >
+                  {isSoldOut ? (
+                    "SOLD OUT"
+                    ) : isActive ? (
+                      isMinting ? 
+                      <CircularProgress /> :
+                      <span>MINT</span>
+                    ) : 
+                    <Countdown
+                      date={mintStartDate}
+                      onMount={({ completed }) => completed && setIsActive(true)}
+                      onComplete={() => setIsActive(true)}
+                      renderer={renderCounter}
+                    />
+                  }
+                </Button>
+              </>
+            }
+          </div>
+        </div>
       </div>
     </main>
   );
@@ -106,7 +176,7 @@ const Home = () => {
 
 const renderCounter = ({ days, hours, minutes, seconds }: any) => {
   return (
-    <span className="text-gray-800 font-bold text-2xl cursor-default">
+    <span className="font-bold text-2xl cursor-default">
       Live in {days} days, {hours} hours, {minutes} minutes, {seconds} seconds
     </span>
   );
