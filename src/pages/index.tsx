@@ -58,10 +58,15 @@ const useStyles = makeStyles({
     "& .MuiOutlinedInput-root.Mui-focused .MuiSelect-iconOutlined": {
       color: "#ffc6c6"
     }
+  },
+  buttonRoot: {
+    "&:disabled": {
+      background: "#d5d5d5"
+    }
   }
 });
 
-const MintButton = styled(Button)``; // add your styles here
+const MINT_PRICE_SOL = Number(process.env.NEXT_PUBLIC_MINT_PRICE_SOL!)
 
 const Home = () => {
   const [balance] = useWalletBalance()
@@ -122,9 +127,19 @@ const Home = () => {
 
           {wallet.connected &&
             <>
-              <p className="font-bold text-lg cursor-default">Balance: {(balance || 0).toLocaleString()} SOL</p>
+              <p className="font-bold text-lg cursor-default">Mint Price: {MINT_PRICE_SOL} SOL</p>
+              {/* <p className="font-bold text-lg cursor-default">Balance: {(balance || 0).toLocaleString()} SOL</p> */}
               <p className="font-bold text-lg cursor-default">Minted / Total: {nftsData.itemsRedeemed} / {nftsData.itemsAvailable}</p>
             </>
+          }
+
+          {!isSoldOut && !isActive && 
+            <Countdown
+              date={mintStartDate}
+              onMount={({ completed }) => completed && setIsActive(true)}
+              onComplete={() => setIsActive(true)}
+              renderer={renderCounter}
+            />
           }
 
           <div className="flex flex-row justify-center items-center space-x-5">
@@ -147,6 +162,7 @@ const Home = () => {
                 <Button 
                   variant="contained"
                   size="large"
+                  className={classes.buttonRoot}
                   disabled={isSoldOut || isMinting || !isActive}
                   onClick={onClickMint}
                 >
@@ -156,13 +172,9 @@ const Home = () => {
                       isMinting ? 
                       <CircularProgress /> :
                       <span>MINT</span>
-                    ) : 
-                    <Countdown
-                      date={mintStartDate}
-                      onMount={({ completed }) => completed && setIsActive(true)}
-                      onComplete={() => setIsActive(true)}
-                      renderer={renderCounter}
-                    />
+                    ) : (
+                      <span>MINT</span>
+                    )
                   }
                 </Button>
               </>
@@ -176,9 +188,9 @@ const Home = () => {
 
 const renderCounter = ({ days, hours, minutes, seconds }: any) => {
   return (
-    <span className="font-bold text-2xl cursor-default">
+    <p className="font-bold cursor-default">
       Live in {days} days, {hours} hours, {minutes} minutes, {seconds} seconds
-    </span>
+    </p>
   );
 };
 
