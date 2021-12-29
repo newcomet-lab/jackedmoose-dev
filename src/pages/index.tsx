@@ -128,7 +128,7 @@ const Home = () => {
           {wallet.connected &&
             <>
               <p className="font-bold text-lg cursor-default">Mint Price: {MINT_PRICE_SOL} SOL</p>
-              {/* <p className="font-bold text-lg cursor-default">Balance: {(balance || 0).toLocaleString()} SOL</p> */}
+              <p className="font-bold text-lg cursor-default">Balance: {(balance || 0).toLocaleString()} SOL</p>
               <p className="font-bold text-lg cursor-default">Minted / Total: {nftsData.itemsRedeemed} / {nftsData.itemsAvailable}</p>
             </>
           }
