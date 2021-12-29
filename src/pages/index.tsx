@@ -102,83 +102,85 @@ const Home = () => {
 
       <Header connected={wallet.connected} />
 
-      <div className="md:flex md:justify-center mt-10 md:mt-24 mx-10 md:mx-24">
-        <div className="flex justify-center items-center flex-1 space-y-3">
-          <img
-            className="rounded-md shadow-lg"
-            src={`/mds.gif`}
-            height={300}
-            width={300}
-            alt="NFT Image" />
-        </div>
-        <div className="flex flex-col justify-center items-center flex-1 space-y-3 text-center">
-          <span className="font-bold text-2xl cursor-default">
-            WELCOME TO JACKED MOOSE!
-          </span>
+      <div className="flex md:h-screen justify-center md:items-center">
+        <div className="md:flex md:justify-center md:mb-20 mt-10 md:mt-1">
+          <div className="flex justify-center md:mx-20 items-center flex-1 space-y-3">
+            <img
+              className="rounded-md shadow-lg"
+              src={`/mds.gif`}
+              height={300}
+              width={300}
+              alt="NFT Image" />
+          </div>
+          <div className="flex flex-col justify-center md:mx-20 items-center flex-1 space-y-3 text-center">
+            <span className="font-bold text-2xl cursor-default">
+              WELCOME TO JACKED MOOSE!
+            </span>
 
-          {!wallet.connected && <span
-            className="font-bold text-2xl cursor-default">
-            NOT CONNECTED, PLEASE CLICK SELECT WALLET...
-          </span>}
+            {!wallet.connected && <span
+              className="font-bold text-2xl cursor-default">
+              NOT CONNECTED, PLEASE CLICK SELECT WALLET...
+            </span>}
 
-          {wallet.connected &&
-            <p className="font-bold text-lg cursor-default">Address: {shortenAddress(wallet.publicKey?.toBase58() || "")}</p>
-          }
+            {wallet.connected &&
+              <p className="font-bold text-lg cursor-default">Address: {shortenAddress(wallet.publicKey?.toBase58() || "")}</p>
+            }
 
-          {wallet.connected &&
-            <>
-              <p className="font-bold text-lg cursor-default">Mint Price: {MINT_PRICE_SOL} SOL</p>
-              <p className="font-bold text-lg cursor-default">Balance: {(balance || 0).toLocaleString()} SOL</p>
-              <p className="font-bold text-lg cursor-default">Minted / Total: {nftsData.itemsRedeemed} / {nftsData.itemsAvailable}</p>
-            </>
-          }
-
-          {!isSoldOut && !isActive && 
-            <Countdown
-              date={mintStartDate}
-              onMount={({ completed }) => completed && setIsActive(true)}
-              onComplete={() => setIsActive(true)}
-              renderer={renderCounter}
-            />
-          }
-
-          <div className="flex flex-row justify-center items-center space-x-5">
             {wallet.connected &&
               <>
-                <TextField
-                  className={classes.selectRoot}
-                  value={mintCount}
-                  onChange={handleMintCountChange}
-                  variant="outlined"
-                  label="Mint Count"
-                  select
-                >
-                  {
-                    (new Array(20).fill(null)).map((_, idx) => 
-                      <MenuItem key={idx} value={idx + 1}>{ idx + 1 }</MenuItem>
-                    )
-                  }
-                </TextField>
-                <Button 
-                  variant="contained"
-                  size="large"
-                  className={classes.buttonRoot}
-                  disabled={isSoldOut || isMinting || !isActive}
-                  onClick={onClickMint}
-                >
-                  {isSoldOut ? (
-                    "SOLD OUT"
-                    ) : isActive ? (
-                      isMinting ? 
-                      <CircularProgress /> :
-                      <span>MINT</span>
-                    ) : (
-                      <span>MINT</span>
-                    )
-                  }
-                </Button>
+                <p className="font-bold text-lg cursor-default">Mint Price: {MINT_PRICE_SOL} SOL</p>
+                <p className="font-bold text-lg cursor-default">Balance: {(balance || 0).toLocaleString()} SOL</p>
+                <p className="font-bold text-lg cursor-default">Minted / Total: {nftsData.itemsRedeemed} / {nftsData.itemsAvailable}</p>
               </>
             }
+
+            {!isSoldOut && !isActive && 
+              <Countdown
+                date={mintStartDate}
+                onMount={({ completed }) => completed && setIsActive(true)}
+                onComplete={() => setIsActive(true)}
+                renderer={renderCounter}
+              />
+            }
+
+            <div className="flex flex-row justify-center items-center space-x-5">
+              {wallet.connected &&
+                <>
+                  <TextField
+                    className={classes.selectRoot}
+                    value={mintCount}
+                    onChange={handleMintCountChange}
+                    variant="outlined"
+                    label="Mint Count"
+                    select
+                  >
+                    {
+                      (new Array(20).fill(null)).map((_, idx) => 
+                        <MenuItem key={idx} value={idx + 1}>{ idx + 1 }</MenuItem>
+                      )
+                    }
+                  </TextField>
+                  <Button 
+                    variant="contained"
+                    size="large"
+                    className={classes.buttonRoot}
+                    disabled={isSoldOut || isMinting || !isActive}
+                    onClick={onClickMint}
+                  >
+                    {isSoldOut ? (
+                      "SOLD OUT"
+                      ) : isActive ? (
+                        isMinting ? 
+                        <CircularProgress /> :
+                        <span>MINT</span>
+                      ) : (
+                        <span>MINT</span>
+                      )
+                    }
+                  </Button>
+                </>
+              }
+            </div>
           </div>
         </div>
       </div>

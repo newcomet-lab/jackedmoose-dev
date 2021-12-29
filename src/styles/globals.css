@@ -9,10 +9,12 @@
 html,
 body,
 #__next {
+  color: #fffdbd;
+}
+main {
   background-image: url('/background.jpg');
   background-repeat: no-repeat;
   background-size: cover;
-  color: #fffdbd;
   height: 100%;
   width : 100%;
 }
