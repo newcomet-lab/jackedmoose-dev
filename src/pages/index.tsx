@@ -92,7 +92,7 @@ const Home = () => {
   const classes = useStyles();
 
   return (
-    <main className="p-5">
+    <main className="p-5 md:min-h-screen flex-1 flex flex-col">
       <Toaster />
       <Head>
         <title>Mint | Jacked Moose</title>
@@ -102,8 +102,8 @@ const Home = () => {
 
       <Header connected={wallet.connected} />
 
-      <div className="flex md:h-screen justify-center md:items-center">
-        <div className="md:flex md:justify-center md:mb-20 mt-10 md:mt-1">
+      <div className="flex justify-center md:items-center flex-1">
+        <div className="md:flex md:justify-center mt-10 md:mt-1">
           <div className="flex justify-center md:mx-20 items-center flex-1 space-y-3">
             <img
               className="rounded-md shadow-lg"
