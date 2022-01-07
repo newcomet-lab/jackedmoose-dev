@@ -9,14 +9,6 @@ import { sleep } from "../utils/utility";
 
 const MINT_PRICE_SOL = Number(process.env.NEXT_PUBLIC_MINT_PRICE_SOL!);
 
-const treasury = new anchor.web3.PublicKey(
-  process.env.NEXT_PUBLIC_TREASURY_ADDRESS!
-);
-
-const config = new anchor.web3.PublicKey(
-  process.env.NEXT_PUBLIC_CANDY_MACHINE_CONFIG!
-);
-
 const candyMachineId = new anchor.web3.PublicKey(
   process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
 );
@@ -28,7 +20,6 @@ const txTimeout = 30000;
 
 export default function useCandyMachine() {
   const [, setBalance] = useWalletBalance()
-  const [candyMachine, setCandyMachine] = useState<CandyMachine>();
   const wallet = useWallet();
   const [nftsData, setNftsData] = useState<any>({} = {
     itemsRemaining: 0,
@@ -55,16 +46,17 @@ export default function useCandyMachine() {
         signAllTransactions: wallet.signAllTransactions,
         signTransaction: wallet.signTransaction,
       } as anchor.Wallet;
-      const { candyMachine, goLiveDate, itemsRemaining } =
+      const candyMachine =
         await getCandyMachineState(
           anchorWallet,
           candyMachineId,
           connection
         );
 
+      const { goLiveDate, itemsRemaining } = candyMachine.state;
+
       setIsSoldOut(itemsRemaining === 0);
-      setMintStartDate(goLiveDate);
-      setCandyMachine(candyMachine);
+      setMintStartDate(new Date(goLiveDate.toNumber()));
     })();
   }, [wallet, candyMachineId, connection]);
 
@@ -77,12 +69,14 @@ export default function useCandyMachine() {
           signTransaction: wallet.signTransaction,
         } as anchor.Wallet;
 
-        const { itemsRemaining, itemsRedeemed, itemsAvailable } =
+        const candyMachine =
           await getCandyMachineState(
             anchorWallet,
             candyMachineId,
             connection
           );
+
+        const { itemsRemaining, itemsRedeemed, itemsAvailable } = candyMachine.state;
 
         setNftsData({ itemsRemaining, itemsRedeemed, itemsAvailable });
       }
@@ -97,7 +91,7 @@ export default function useCandyMachine() {
         signAllTransactions: wallet.signAllTransactions,
         signTransaction: wallet.signTransaction,
       } as anchor.Wallet;
-      const { candyMachine } =
+      const candyMachine =
         await getCandyMachineState(
           anchorWallet,
           candyMachineId,
@@ -105,23 +99,23 @@ export default function useCandyMachine() {
         );
 
       if (wallet.connected && candyMachine?.program && wallet.publicKey) {
-        const mintTxId = await mintOneToken(
-          candyMachine,
-          config,
-          wallet.publicKey,
-          treasury
-        );
+        const mintTxId = (
+          await mintOneToken(candyMachine, wallet.publicKey)
+        )[0];
 
-        const status = await awaitTransactionSignatureConfirmation(
-          mintTxId,
-          txTimeout,
-          connection,
-          "singleGossip",
-          false
-        );
+        let status: any = { err: true };
+        if (mintTxId) {
+          status = await awaitTransactionSignatureConfirmation(
+            mintTxId,
+            txTimeout,
+            connection,
+            'singleGossip',
+            true,
+          );
+        }
 
         if (!status?.err) {
-          toast.success("Congratulations! Mint succeeded! Check the 'My Arts' page :)")
+          toast.success("Congratulations! Mint succeeded!")
         } else {
           toast.error("Mint failed! Please try again!")
         }
@@ -129,7 +123,9 @@ export default function useCandyMachine() {
     } catch (error: any) {
       let message = error.msg || "Minting failed! Please try again!";
       if (!error.msg) {
-        if (error.message.indexOf("0x138")) {
+        if (!error.message) {
+          message = 'Transaction Timeout! Please try again.';
+        } else if (error.message.indexOf("0x138")) {
         } else if (error.message.indexOf("0x137")) {
           message = `SOLD OUT!`;
         } else if (error.message.indexOf("0x135")) {
@@ -161,7 +157,7 @@ export default function useCandyMachine() {
         signAllTransactions: wallet.signAllTransactions,
         signTransaction: wallet.signTransaction,
       } as anchor.Wallet;
-      const { candyMachine } =
+      const candyMachine =
         await getCandyMachineState(
           anchorWallet,
           candyMachineId,
@@ -173,9 +169,7 @@ export default function useCandyMachine() {
 
         const signedTransactions: any = await mintMultipleToken(
           candyMachine,
-          config,
           wallet.publicKey,
-          treasury,
           quantity
         );
 
@@ -214,7 +208,7 @@ export default function useCandyMachine() {
         }
 
         if(totalSuccess) {
-          toast.success(`Congratulations! ${totalSuccess} mints succeeded! Your NFT's should appear in your wallet soon :)`, { duration: 6000, position: "bottom-center" })
+          toast.success(`Congratulations! ${totalSuccess} mints succeeded!`, { duration: 6000, position: "bottom-center" })
         }
 
         if(totalFailure) {
