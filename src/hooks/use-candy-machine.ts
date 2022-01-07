@@ -56,7 +56,7 @@ export default function useCandyMachine() {
       const { goLiveDate, itemsRemaining } = candyMachine.state;
 
       setIsSoldOut(itemsRemaining === 0);
-      setMintStartDate(new Date(goLiveDate.toNumber()));
+      setMintStartDate(new Date(goLiveDate.toNumber() * 1000));
     })();
   }, [wallet, candyMachineId, connection]);
 
